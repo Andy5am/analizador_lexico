@@ -4,10 +4,9 @@ CHARACTERS
 
 letra = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
 digito = "01234567890".
-digitoHex = 
-digito + "ABCDEF".
+digitoHex = digito + "ABCDEF".
 enBlanco = CHR(9) + CHR(32).
-comillas = CHR(34).
+comillas = CHR(43) + CHR(64).
 cualquiera = letra + digito + enBlanco.
 
 
@@ -22,10 +21,15 @@ Mientras = "While".
 TOKENS
 
 identificador = letra{letra|digito} EXCEPT KEYWORDS.
-numero = digito{digito}.
+numero = digito{digito}"num".
+
+
+
 numeroDecimal = digito{digito}"."digito{digito}.
 numeroHex = digitoHex{digitoHex}"H".
 espacioEnBlanco = enBlanco{enBlanco}.
-cadena = comillas cualquiera{cualquiera} comillas.
+cadena = comillas {cualquiera} comillas.
+
+PRODUCTIONS
 
 END ArchivoPrueba3

@@ -403,25 +403,22 @@ class LexGenerator:
     def __init__(self):
         self.compiler_def = None
         self.FILE_LINES = []
-        self.extract_compiler_def()
-        self.lex_analyzer_construction()
+        self.ext_comp()
+        self.const_analyzer()
         self.run_lex_analyzer()
 
-    def add_header(self):
+    def header(self):
         self.FILE_LINES.append('# Andy Castillo')
-    def add_enter(self):
+    def enter(self):
         self.FILE_LINES.append('')
 
-    def add_line(self, line):
+    def line(self, line):
         self.FILE_LINES.append(line)
 
-    def extract_compiler_def(self):
-        # -------------------------------------------------------
-        # Extracting content from compiler definition file
-        # -------------------------------------------------------
+    def ext_comp(self):
 
         try:
-            archivo = input('Escriba el nombre del archivo de COCOL: ')
+            archivo = input('Escriba el nombre del archivo de COCO: ')
             entry_file = open(archivo, 'r')
         except IOError:
             Log.FAIL('\nArchivo no encontrado')
@@ -436,10 +433,7 @@ class LexGenerator:
 
         Log.OKGREEN('\nContenido analizado!\n')
 
-    def lex_analyzer_construction(self):
-        # -------------------------------------------------------
-        # Writing the lexical analyzer file
-        # -------------------------------------------------------
+    def const_analyzer(self):
         try:
             os.system('cp analizador.template.py analizador.py')
 
@@ -879,13 +873,13 @@ class CompilerDef():
         self.current_token_index = 0
 
         self.get_tokens()
-        self.has_lexical_errors()
+        self.lex_errors()
 
-        self.clean_tokens()
-        # self.check_sintax()
+        self.clear_tokens()
+        # self.sintax_check()
         # self.has_sintax_errors()
 
-        self.get_definitions()
+        self.get_def()
         self.has_sintax_errors()
 
     def get_tokens(self):
@@ -894,7 +888,7 @@ class CompilerDef():
         line_index = 0
         while line_index < len(self.file_lines):
             line = self.file_lines[line_index].replace('\n', '\\n')
-            analyzed_lines = self.eval_line(line, line_index)
+            analyzed_lines = self.line_eval(line, line_index)
             line_index += analyzed_lines
 
         # Log.OKGREEN('\n\nTokens found:')
@@ -904,7 +898,7 @@ class CompilerDef():
         #     else:
         #         Log.INFO(token)
 
-    def eval_line(self, line, line_index):
+    def line_eval(self, line, line_index):
         # Se extraen los tokens por linea
         analyzed_lines = 1
         line_position = 0
@@ -967,11 +961,11 @@ class CompilerDef():
                         new_line = line.replace('\\n', ' ') + ' ' + self.file_lines[line_index + 1].replace('\n', '\\n')
                         line_index += 1
                         Log.INFO('Trying: ', new_line)
-                        analyzed_lines += self.eval_line(new_line, line_index)
+                        analyzed_lines += self.line_eval(new_line, line_index)
 
         return analyzed_lines
 
-    def has_lexical_errors(self):
+    def lex_errors(self):
         # Log.OKBLUE('\n\nErrores:')
         for token in self.tokens:
             if token.type == 'ERROR':
@@ -979,11 +973,11 @@ class CompilerDef():
                 self.lexical_errors = True
 
         if self.lexical_errors:
-            Log.FAIL('\tErrores en el archivo COCOL')
+            Log.FAIL('\tErrores en el archivo COCO')
             Log.WARNING('\nPlease fix errors before continuing')
             exit()
 
-    def clean_tokens(self):
+    def clear_tokens(self):
         # for token in self.tokens:
         token_index = 0
         while token_index < len(self.tokens):
@@ -999,7 +993,7 @@ class CompilerDef():
             else:
                 self.tokens_clean.append(token)
 
-    def get_definitions(self):
+    def get_def(self):
         # Gramaticas libres de contexto - Analisis Sintactico
         # Adding Mandatory Tokens
         self.CHARACTERS = {}
@@ -1125,11 +1119,11 @@ class CompilerDef():
         self.TOKENS_RE = self.parse_TOKENS_RE(self.TOKENS_RE)
         self.TOKENS_RE['space'] = ' '
 
-    def check_sintax(self):
+    def sintax_check(self):
         # Analizar flujo de tokens
-        has_valid_sintax = self.has_valid_sintax(PRODUCTIONS['program'])
+        valid_syntax = self.valid_syntax(PRODUCTIONS['program'])
 
-        if not has_valid_sintax:
+        if not valid_syntax:
             self.sintax_errors = True
 
         if self.current_token_index < len(self.tokens_clean):
@@ -1137,7 +1131,7 @@ class CompilerDef():
             #     self.sintax_errors = True
             Log.FAIL('\n\nError en la linea ', self.tokens_clean[self.current_token_index].line, ' columna ', self.tokens_clean[self.current_token_index].column, ': ', self.tokens_clean[self.current_token_index].value)
 
-    def has_valid_sintax(self, productions):
+    def valid_syntax(self, productions):
         valid_production = False
         current_sintax_index = 0
         while current_sintax_index < len(productions):
@@ -1154,7 +1148,7 @@ class CompilerDef():
                 optional = True
 
             if sintax_token['type'] == 'PRODUCTION':
-                valid_sub_production = self.has_valid_sintax(PRODUCTIONS[sintax_token['value']])
+                valid_sub_production = self.valid_syntax(PRODUCTIONS[sintax_token['value']])
 
                 valid_production = valid_sub_production
 
@@ -1180,7 +1174,7 @@ class CompilerDef():
 
             if ocurrences:
                 while True:
-                    valid_repited_sub_production = self.has_valid_sintax(PRODUCTIONS[sintax_token['value']])
+                    valid_repited_sub_production = self.valid_syntax(PRODUCTIONS[sintax_token['value']])
 
                     if not valid_repited_sub_production:
                         break
@@ -1281,5 +1275,5 @@ class CompilerDef():
 
     def has_sintax_errors(self):
         if self.sintax_errors:
-            Log.FAIL('\nErrores en archivo de COCOL')
+            Log.FAIL('\nErrores en archivo de COCO')
             exit()

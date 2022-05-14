@@ -44,7 +44,7 @@ class Token():
 
 # -------------------------------------------------------
 
-def eval_line(entry_file_lines, line, line_index):
+def line_eval(entry_file_lines, line, line_index):
     analyzed_lines = 1
     line_position = 0
     current_line_recognized_tokens = []
@@ -94,7 +94,7 @@ def eval_line(entry_file_lines, line, line_index):
                     new_line = line + ' ' + entry_file_lines[line_index + 1].replace('\n', '\\n')
                     line_index += 1
                     Log.INFO('Trying: ', new_line)
-                    analyzed_lines += eval_line(entry_file_lines, new_line, line_index)
+                    analyzed_lines += line_eval(entry_file_lines, new_line, line_index)
 
     return analyzed_lines
 
@@ -117,7 +117,7 @@ def run():
     line_index = 0
     while line_index < len(entry_file_lines):
         line = entry_file_lines[line_index].replace('\n', '\\n')
-        analyzed_lines = eval_line(entry_file_lines, line, line_index)
+        analyzed_lines = line_eval(entry_file_lines, line, line_index)
         line_index += analyzed_lines
 
     # Log.OKGREEN('\n\nTokens:')

@@ -11,19 +11,19 @@ CHARACTERS = {
     'B': '01234567890',
     'C': '01234567890ABCDEF',
     'D': '	 ',
-    'E': '"',
+    'E': '+@',
     'F': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890	 ',
     ' ': ' ',
-    'S': '.',
-    'T': 'H',
+    'S': 'num',
+    'T': '.',
+    'U': 'H',
 }
 
 # KEYWORDS
 KEYWORDS = {
     'NEWLINE': '\\n',
     'si': 'if',
-    'para': 'for',
-    'mientras': 'while',
+    'para': 'forwhile',
     'MIENTRAS': 'WHILE',
     'Mientras': 'While',
 }
@@ -31,11 +31,11 @@ KEYWORDS = {
 # TOKENS RE
 TOKENS_RE = {
     'identificador': 'A«A¦B»±',
-    'numero': 'B«B»±',
-    'numeroDecimal': 'B«B»±SB«B»±',
-    'numeroHex': 'C«C»±T',
+    'numero': 'B«B»±S',
+    'numeroDecimal': 'B«B»±TB«B»±',
+    'numeroHex': 'C«C»±U',
     'espacioEnBlanco': 'D«D»±',
-    'cadena': 'EF«F»±E',
+    'cadena': 'E«F»±E',
     'space': ' ',
 }
 
@@ -69,7 +69,7 @@ class Token():
 
 # -------------------------------------------------------
 
-def eval_line(entry_file_lines, line, line_index):
+def line_eval(entry_file_lines, line, line_index):
     analyzed_lines = 1
     line_position = 0
     current_line_recognized_tokens = []
@@ -119,7 +119,7 @@ def eval_line(entry_file_lines, line, line_index):
                     new_line = line + ' ' + entry_file_lines[line_index + 1].replace('\n', '\\n')
                     line_index += 1
                     Log.INFO('Trying: ', new_line)
-                    analyzed_lines += eval_line(entry_file_lines, new_line, line_index)
+                    analyzed_lines += line_eval(entry_file_lines, new_line, line_index)
 
     return analyzed_lines
 
@@ -142,7 +142,7 @@ def run():
     line_index = 0
     while line_index < len(entry_file_lines):
         line = entry_file_lines[line_index].replace('\n', '\\n')
-        analyzed_lines = eval_line(entry_file_lines, line, line_index)
+        analyzed_lines = line_eval(entry_file_lines, line, line_index)
         line_index += analyzed_lines
 
     # Log.OKGREEN('\n\nTokens:')
@@ -156,7 +156,7 @@ def run():
     # GET TOKENS
     # -------------------------------------------------------
     lexical_errors = False
-    Log.FAIL('\n\nErrores:')
+    # Log.FAIL('\n\nErrores:')
     for token in TOKENS:
         if token.type == 'ERROR':
             Log.FAIL(f'Error en la linea {token.line} columna {token.column}: {token.value}')
